@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from "react";
 import axios from "axios";
-import { Transaction } from "../Types/transaction";
+import { Transaction } from "../types/transaction";
 import {
     Box,
     Button,
