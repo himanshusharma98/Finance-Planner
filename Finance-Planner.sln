@@ -7,10 +7,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Servers", "Servers", "{02EA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinancePlanner.API", "FinancePlanner.API\FinancePlanner.API.csproj", "{D0D00D37-87CD-42C5-82E3-42AE14A3D65E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{A8CC90C2-0332-4C5E-A4DB-D4CF1BE1CB78}"
-EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "finance-planner-frontend", "Finance-Planner-Frondend\finance-planner-frontend.esproj", "{65FD6E87-695F-C0DC-3FB4-9D66730ADFAB}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,19 +17,12 @@ Global
 		{D0D00D37-87CD-42C5-82E3-42AE14A3D65E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0D00D37-87CD-42C5-82E3-42AE14A3D65E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0D00D37-87CD-42C5-82E3-42AE14A3D65E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{65FD6E87-695F-C0DC-3FB4-9D66730ADFAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{65FD6E87-695F-C0DC-3FB4-9D66730ADFAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{65FD6E87-695F-C0DC-3FB4-9D66730ADFAB}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{65FD6E87-695F-C0DC-3FB4-9D66730ADFAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{65FD6E87-695F-C0DC-3FB4-9D66730ADFAB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{65FD6E87-695F-C0DC-3FB4-9D66730ADFAB}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{D0D00D37-87CD-42C5-82E3-42AE14A3D65E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{65FD6E87-695F-C0DC-3FB4-9D66730ADFAB} = {A8CC90C2-0332-4C5E-A4DB-D4CF1BE1CB78}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {211B4B76-9AF6-454E-B93B-AD5FA08C1634}
