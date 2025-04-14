@@ -28,24 +28,17 @@ namespace FinancePlanner.API.Controllers
             }
             return transaction;
         }
+
         [HttpPost]
-        public async Task<ActionResult<Transaction>> Create(Transaction transaction)
+        public async Task<ActionResult<Transaction>> Create([FromBody] Transaction transaction)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             _context.Transactions.Add(transaction);
             await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(Get), new { id = transaction.Id }, transaction);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Transaction updatedTransaction)
-        {
-            if (id != updatedTransaction.Id)
-                return BadRequest();
-
-            _context.Entry(updatedTransaction).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
         [HttpDelete("{id}")]
