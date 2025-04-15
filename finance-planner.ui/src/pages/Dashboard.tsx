@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { baseURL } from "../services/api";
 import { Transaction } from "../types/transaction";
+import EditTransactionModal from "../pages/EditTransactionModal";
 import {
     Table,
     Button,
@@ -32,7 +33,10 @@ const Dashboard = () => {
         type: "Expense",
         notes: "",
     });
+
     const [loading, setLoading] = useState(false);
+    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [editTransaction, setEditTransaction] = useState<Transaction | null>(null);
 
     const fetchTransactions = async () => {
         setLoading(true);
@@ -62,7 +66,6 @@ const Dashboard = () => {
 
         try {
             const response = await axios.post(`${baseURL}/transactions`, newTransaction);
-
             if (response.status === 201 || response.status === 200) {
                 message.success("Transaction added successfully");
                 await fetchTransactions();
@@ -131,43 +134,50 @@ const Dashboard = () => {
         {
             title: "Actions",
             key: "actions",
+            fixed: "right",
             render: (_: any, record: Transaction) => (
-                <Button
-                    type="primary"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() => deleteTransaction(record.id)}
-                >
-                    Delete
-                </Button>
+                <Space>
+                    <Button
+                        onClick={() => {
+                            setEditTransaction(record);
+                            setEditModalVisible(true);
+                        }}
+                    >
+                        Edit
+                    </Button>
+                    <Button
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => deleteTransaction(record.id)}
+                    >
+                        Delete
+                    </Button>
+                </Space>
             ),
         },
     ];
 
     return (
-        <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-            <Title level={2} style={{ textAlign: "center", marginBottom: "20px" }}>
+        <div style={{ padding: "24px", maxWidth: "1280px", margin: "0 auto" }}>
+            <Title level={2} style={{ textAlign: "center", marginBottom: "24px" }}>
                 Finance Dashboard
             </Title>
 
-            <Card style={{ marginBottom: "20px", padding: "20px" }}>
-                <Form layout="vertical" onFinish={addTransaction}>
-                    <Row gutter={[16, 16]}>
-                        <Col xs={24} sm={12} md={8} lg={6}>
+            <Row gutter={[24, 24]}>
+                {/* Form */}
+                <Col xs={24} md={10}>
+                    <Card title="Add Transaction" bordered>
+                        <Form layout="vertical" onFinish={addTransaction}>
                             <Form.Item label="Title" required>
                                 <Input
                                     placeholder="Enter title"
                                     value={newTransaction.title}
                                     onChange={(e) =>
-                                        setNewTransaction({
-                                            ...newTransaction,
-                                            title: e.target.value,
-                                        })
+                                        setNewTransaction({ ...newTransaction, title: e.target.value })
                                     }
                                 />
                             </Form.Item>
-                        </Col>
-                        <Col xs={24} sm={12} md={8} lg={6}>
+
                             <Form.Item label="Amount" required>
                                 <Input
                                     type="number"
@@ -181,95 +191,96 @@ const Dashboard = () => {
                                     }
                                 />
                             </Form.Item>
-                        </Col>
-                        <Col xs={24} sm={12} md={8} lg={6}>
+
                             <Form.Item label="Category" required>
                                 <Input
                                     placeholder="Enter category"
                                     value={newTransaction.category}
                                     onChange={(e) =>
-                                        setNewTransaction({
-                                            ...newTransaction,
-                                            category: e.target.value,
-                                        })
+                                        setNewTransaction({ ...newTransaction, category: e.target.value })
                                     }
                                 />
                             </Form.Item>
-                        </Col>
-                        <Col xs={24} sm={12} md={8} lg={6}>
+
                             <Form.Item label="Type" required>
                                 <Select
                                     value={newTransaction.type}
                                     onChange={(value) =>
-                                        setNewTransaction({
-                                            ...newTransaction,
-                                            type: value,
-                                        })
+                                        setNewTransaction({ ...newTransaction, type: value })
                                     }
                                 >
                                     <Option value="Income">Income</Option>
                                     <Option value="Expense">Expense</Option>
                                 </Select>
                             </Form.Item>
-                        </Col>
-                        <Col xs={24} sm={12} md={8} lg={6}>
+
                             <Form.Item label="Date" required>
                                 <DatePicker
-                                    value={
-                                        newTransaction.date
-                                            ? dayjs(newTransaction.date)
-                                            : null
-                                    }
+                                    value={newTransaction.date ? dayjs(newTransaction.date) : null}
                                     onChange={(date) =>
                                         setNewTransaction({
                                             ...newTransaction,
-                                            date: date
-                                                ? date.format("YYYY-MM-DD")
-                                                : "",
+                                            date: date ? date.format("YYYY-MM-DD") : "",
                                         })
                                     }
-                                    allowClear
+                                    style={{ width: "100%" }}
                                 />
                             </Form.Item>
-                        </Col>
-                        <Col xs={24} sm={12} md={8} lg={6}>
+
                             <Form.Item label="Notes">
-                                <Input
-                                    placeholder="Enter notes"
+                                <Input.TextArea
+                                    placeholder="Enter notes (max 250 characters)"
                                     value={newTransaction.notes}
                                     onChange={(e) =>
                                         setNewTransaction({
                                             ...newTransaction,
-                                            notes: e.target.value,
+                                            notes: e.target.value.slice(0, 250),
                                         })
                                     }
+                                    showCount
+                                    maxLength={250}
+                                    autoSize={{ minRows: 3, maxRows: 5 }}
                                 />
                             </Form.Item>
-                        </Col>
-                        <Col xs={24}>
-                            <Button
-                                type="primary"
-                                htmlType="submit"
-                                icon={<PlusOutlined />}
-                                block
-                            >
-                                Add Transaction
-                            </Button>
-                        </Col>
-                    </Row>
-                </Form>
-            </Card>
 
-            <Card>
-                <Table
-                    dataSource={transactions}
-                    columns={columns}
-                    rowKey="id"
-                    loading={loading}
-                    pagination={{ pageSize: 5 }}
-                    bordered
-                />
-            </Card>
+                            <Form.Item>
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    icon={<PlusOutlined />}
+                                    block
+                                >
+                                    Add Transaction
+                                </Button>
+                            </Form.Item>
+                        </Form>
+                    </Card>
+                </Col>
+
+                {/* Table */}
+                <Col xs={24} md={14}>
+                    <Card title="Transactions" style={{ minHeight: 500 }}>
+                        <Table
+                            dataSource={transactions}
+                            columns={columns}
+                            rowKey={(record) => record.id}
+                            loading={loading}
+                            pagination={{ pageSize: 6 }}
+                            bordered
+                            scroll={{ x: "max-content" }} // ✅ Prevent overflow on smaller screens
+                        />
+                        <EditTransactionModal
+                            open={editModalVisible}
+                            transaction={editTransaction}
+                            onClose={() => {
+                                setEditModalVisible(false);
+                                setEditTransaction(null);
+                            }}
+                            onUpdate={fetchTransactions}
+                        />
+                    </Card>
+                </Col>
+            </Row>
         </div>
     );
 };
