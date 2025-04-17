@@ -36,7 +36,6 @@ const EditTransactionModal = ({ open, transaction, onClose, onUpdate }: Props) =
         if (!updatedTransaction) return;
 
         setSaving(true);
-
         try {
             await axios.put(`${baseURL}/transactions/${updatedTransaction.id}`, updatedTransaction);
             message.success("✅ Transaction updated successfully");
@@ -51,7 +50,7 @@ const EditTransactionModal = ({ open, transaction, onClose, onUpdate }: Props) =
 
     return (
         <Modal
-            title={<Title level={4} style={{ marginBottom: 0 }}>Edit Transaction</Title>}
+            title={<Title level={4} style={{ margin: 0 }}>✏️ Edit Transaction</Title>}
             open={open}
             onCancel={onClose}
             onOk={handleUpdate}
@@ -59,11 +58,11 @@ const EditTransactionModal = ({ open, transaction, onClose, onUpdate }: Props) =
             cancelText="Cancel"
             confirmLoading={saving}
             centered
-            bodyStyle={{ paddingTop: 0 }}
             maskClosable={false}
             destroyOnClose
         >
             <Divider style={{ margin: "12px 0" }} />
+
             <Form layout="vertical">
                 <Form.Item label="Title" required>
                     <Input
@@ -91,7 +90,7 @@ const EditTransactionModal = ({ open, transaction, onClose, onUpdate }: Props) =
 
                 <Form.Item label="Category" required>
                     <Input
-                        placeholder="e.g. Rent, Groceries, Salary"
+                        placeholder="e.g. Rent, Food, Salary"
                         value={updatedTransaction?.category}
                         onChange={(e) =>
                             setUpdatedTransaction((prev) => ({ ...prev!, category: e.target.value }))
@@ -113,12 +112,13 @@ const EditTransactionModal = ({ open, transaction, onClose, onUpdate }: Props) =
 
                 <Form.Item label="Date" required>
                     <DatePicker
+                        allowClear
                         style={{ width: "100%" }}
-                        value={dayjs(updatedTransaction?.date)}
+                        value={updatedTransaction?.date ? dayjs(updatedTransaction.date) : null}
                         onChange={(date) =>
                             setUpdatedTransaction((prev) => ({
                                 ...prev!,
-                                date: date?.format("YYYY-MM-DD") || "",
+                                date: date ? date.format("YYYY-MM-DD") : "",
                             }))
                         }
                     />
@@ -126,7 +126,7 @@ const EditTransactionModal = ({ open, transaction, onClose, onUpdate }: Props) =
 
                 <Form.Item label="Notes">
                     <Input.TextArea
-                        placeholder="Enter notes (max 250 characters)"
+                        placeholder="Optional notes (max 250 characters)"
                         value={updatedTransaction?.notes}
                         onChange={(e) =>
                             setUpdatedTransaction((prev) => ({
@@ -136,13 +136,13 @@ const EditTransactionModal = ({ open, transaction, onClose, onUpdate }: Props) =
                         }
                         showCount
                         maxLength={250}
-                        autoSize={{ minRows: 2, maxRows: 4 }}
+                        autoSize={{ minRows: 3, maxRows: 5 }}
                     />
                 </Form.Item>
             </Form>
 
             <Text type="secondary" style={{ fontSize: "12px" }}>
-                Make sure the transaction details are accurate before saving.
+                Please double-check before saving your changes.
             </Text>
         </Modal>
     );
