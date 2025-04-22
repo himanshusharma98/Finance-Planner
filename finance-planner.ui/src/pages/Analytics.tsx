@@ -12,6 +12,7 @@ import {
     Select,
     DatePicker,
     Space,
+    message,
 } from "antd";
 import {
     PieChart,
@@ -44,23 +45,45 @@ const Analytics = () => {
     const [dateRange, setDateRange] = useState<[any, any] | null>(null);
     const [loading, setLoading] = useState(true);
 
+    // ✅ Attach JWT token to Axios
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            message.error("Unauthorized. Please login.");
+            window.location.href = "/login";
+            return;
+        }
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+        loadAllCategories();
+        fetchAnalytics();
+    }, []);
+
+    useEffect(() => {
+        fetchAnalytics();
+    }, [selectedCategory, dateRange]);
+
     const fetchAnalytics = async () => {
         setLoading(true);
 
         const baseParams: any = {};
-        if (dateRange) {
-            baseParams.startDate = dateRange[0]?.format("YYYY-MM-DD");
-            baseParams.endDate = dateRange[1]?.format("YYYY-MM-DD");
+
+        if (dateRange?.[0] && dateRange?.[1]) {
+            baseParams.startDate = dayjs(dateRange[0]).format("YYYY-MM-DD");
+            baseParams.endDate = dayjs(dateRange[1]).format("YYYY-MM-DD");
         }
 
         const summaryParams = { ...baseParams };
-        if (selectedCategory) summaryParams.category = selectedCategory;
+
+        if (selectedCategory && selectedCategory !== "") {
+            summaryParams.category = selectedCategory;
+        }
 
         try {
             const [summaryRes, categoryRes, trendRes] = await Promise.all([
                 axios.get(`${baseURL}/analytics/summary`, { params: summaryParams }),
                 axios.get(`${baseURL}/analytics/category-summary`, { params: baseParams }),
-                axios.get(`${baseURL}/analytics/monthly-trend`, { params: summaryParams })
+                axios.get(`${baseURL}/analytics/monthly-trend`, { params: summaryParams }),
             ]);
 
             setSummary(summaryRes.data);
@@ -72,9 +95,11 @@ const Analytics = () => {
                 if (!groupedTrend[label]) groupedTrend[label] = { label, income: 0, expense: 0 };
                 groupedTrend[label][item.type.toLowerCase()] = item.total;
             });
+
             setMonthlyTrend(Object.values(groupedTrend));
-        } catch (err) {
-            console.error("Error fetching analytics", err);
+        } catch (err: any) {
+            console.error("Analytics fetch error", err);
+            message.error("Error fetching analytics data.");
         } finally {
             setLoading(false);
         }
@@ -86,18 +111,10 @@ const Analytics = () => {
             const unique = Array.from(new Set(res.data.map((t: any) => t.category)));
             setAllCategories(unique);
         } catch (err) {
-            console.error("Error loading categories");
+            console.error("Category fetch error");
+            message.error("Error loading categories.");
         }
     };
-
-    useEffect(() => {
-        loadAllCategories();
-        fetchAnalytics();
-    }, []);
-
-    useEffect(() => {
-        fetchAnalytics();
-    }, [selectedCategory, dateRange]);
 
     return (
         <div style={{ padding: "32px", maxWidth: "1400px", margin: "0 auto" }}>
@@ -134,7 +151,6 @@ const Analytics = () => {
                 </div>
             ) : (
                 <>
-                    {/* Summary Cards */}
                     <Row gutter={24} style={{ marginBottom: 32 }}>
                         <Col xs={24} md={8}>
                             <Card bordered style={{ borderLeft: "5px solid #3f8600" }}>
@@ -170,7 +186,6 @@ const Analytics = () => {
 
                     <Divider style={{ margin: "32px 0" }} />
 
-                    {/* Charts */}
                     <Row gutter={32}>
                         <Col xs={24} md={12}>
                             <Card title="📎 Category-wise Expenses" hoverable>
@@ -211,17 +226,17 @@ const Analytics = () => {
                                             type="monotone"
                                             dataKey="income"
                                             stroke="#36A2EB"
-                                            name="Income"
                                             strokeWidth={2}
                                             dot={false}
+                                            name="Income"
                                         />
                                         <Line
                                             type="monotone"
                                             dataKey="expense"
                                             stroke="#FF6384"
-                                            name="Expense"
                                             strokeWidth={2}
                                             dot={false}
+                                            name="Expense"
                                         />
                                     </LineChart>
                                 </ResponsiveContainer>
