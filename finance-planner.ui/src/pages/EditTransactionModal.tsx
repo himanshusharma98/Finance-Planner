@@ -10,8 +10,7 @@
 } from "antd";
 import { Transaction } from "../types/transaction";
 import dayjs from "dayjs";
-import axios from "axios";
-import { baseURL } from "../services/api";
+import api from "../services/api";
 import { useState, useEffect } from "react";
 
 const { Option } = Select;
@@ -25,19 +24,36 @@ interface Props {
 }
 
 const EditTransactionModal = ({ open, transaction, onClose, onUpdate }: Props) => {
-    const [updatedTransaction, setUpdatedTransaction] = useState<Transaction | null>(transaction);
+    const [form] = Form.useForm();
     const [saving, setSaving] = useState(false);
+    const [isChanged, setIsChanged] = useState(false);
 
     useEffect(() => {
-        setUpdatedTransaction(transaction);
-    }, [transaction]);
+        if (transaction) {
+            form.setFieldsValue({
+                ...transaction,
+                date: transaction.date ? dayjs(transaction.date) : null,
+            });
+            setIsChanged(false);
+        }
+    }, [transaction, form]);
 
     const handleUpdate = async () => {
-        if (!updatedTransaction) return;
-
-        setSaving(true);
         try {
-            await axios.put(`${baseURL}/transactions/${updatedTransaction.id}`, updatedTransaction);
+            const values = await form.validateFields();
+
+            // ✅ Remove ID from payload
+            const payload = {
+                title: values.title,
+                amount: values.amount,
+                category: values.category,
+                type: values.type,
+                date: values.date ? values.date.format("YYYY-MM-DD") : "",
+                notes: values.notes,
+            };
+
+            setSaving(true);
+            await api.put(`/transactions/${transaction?.id}`, payload);
             message.success("✅ Transaction updated successfully");
             onUpdate();
             onClose();
@@ -46,6 +62,19 @@ const EditTransactionModal = ({ open, transaction, onClose, onUpdate }: Props) =
         } finally {
             setSaving(false);
         }
+    };
+
+    const checkIfChanged = (_, allValues: any) => {
+        if (!transaction) return;
+        const changed =
+            transaction.title !== allValues.title ||
+            transaction.amount !== allValues.amount ||
+            transaction.category !== allValues.category ||
+            transaction.type !== allValues.type ||
+            dayjs(transaction.date).format("YYYY-MM-DD") !== allValues.date?.format("YYYY-MM-DD") ||
+            transaction.notes !== allValues.notes;
+
+        setIsChanged(changed);
     };
 
     return (
@@ -60,80 +89,37 @@ const EditTransactionModal = ({ open, transaction, onClose, onUpdate }: Props) =
             centered
             maskClosable={false}
             destroyOnClose
+            okButtonProps={{ disabled: !isChanged }}
         >
             <Divider style={{ margin: "12px 0" }} />
 
-            <Form layout="vertical">
-                <Form.Item label="Title" required>
-                    <Input
-                        placeholder="Enter transaction title"
-                        value={updatedTransaction?.title}
-                        onChange={(e) =>
-                            setUpdatedTransaction((prev) => ({ ...prev!, title: e.target.value }))
-                        }
-                    />
+            <Form layout="vertical" form={form} onValuesChange={checkIfChanged}>
+                <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+                    <Input placeholder="Enter transaction title" />
                 </Form.Item>
 
-                <Form.Item label="Amount (₹)" required>
-                    <Input
-                        type="number"
-                        placeholder="Enter amount"
-                        value={updatedTransaction?.amount}
-                        onChange={(e) =>
-                            setUpdatedTransaction((prev) => ({
-                                ...prev!,
-                                amount: parseFloat(e.target.value) || 0,
-                            }))
-                        }
-                    />
+                <Form.Item name="amount" label="Amount (₹)" rules={[{ required: true }]}>
+                    <Input type="number" placeholder="Enter amount" />
                 </Form.Item>
 
-                <Form.Item label="Category" required>
-                    <Input
-                        placeholder="e.g. Rent, Food, Salary"
-                        value={updatedTransaction?.category}
-                        onChange={(e) =>
-                            setUpdatedTransaction((prev) => ({ ...prev!, category: e.target.value }))
-                        }
-                    />
+                <Form.Item name="category" label="Category" rules={[{ required: true }]}>
+                    <Input placeholder="e.g. Rent, Food, Salary" />
                 </Form.Item>
 
-                <Form.Item label="Type" required>
-                    <Select
-                        value={updatedTransaction?.type}
-                        onChange={(value) =>
-                            setUpdatedTransaction((prev) => ({ ...prev!, type: value }))
-                        }
-                    >
+                <Form.Item name="type" label="Type" rules={[{ required: true }]}>
+                    <Select>
                         <Option value="Income">Income</Option>
                         <Option value="Expense">Expense</Option>
                     </Select>
                 </Form.Item>
 
-                <Form.Item label="Date" required>
-                    <DatePicker
-                        allowClear
-                        style={{ width: "100%" }}
-                        value={updatedTransaction?.date ? dayjs(updatedTransaction.date) : null}
-                        onChange={(date) =>
-                            setUpdatedTransaction((prev) => ({
-                                ...prev!,
-                                date: date ? date.format("YYYY-MM-DD") : "",
-                            }))
-                        }
-                    />
+                <Form.Item name="date" label="Date" rules={[{ required: true }]}>
+                    <DatePicker style={{ width: "100%" }} />
                 </Form.Item>
 
-                <Form.Item label="Notes">
+                <Form.Item name="notes" label="Notes">
                     <Input.TextArea
                         placeholder="Optional notes (max 250 characters)"
-                        value={updatedTransaction?.notes}
-                        onChange={(e) =>
-                            setUpdatedTransaction((prev) => ({
-                                ...prev!,
-                                notes: e.target.value.slice(0, 250),
-                            }))
-                        }
                         showCount
                         maxLength={250}
                         autoSize={{ minRows: 3, maxRows: 5 }}

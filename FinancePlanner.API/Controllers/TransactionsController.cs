@@ -44,21 +44,22 @@ namespace FinancePlanner.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] Transaction updatedTransaction)
         {
-            if (id != updatedTransaction.Id)
-                return BadRequest("Transaction ID mismatch.");
             var existingTransaction = await _context.Transactions.FindAsync(id);
             if (existingTransaction == null)
                 return NotFound("Transaction not found.");
-            // Update only allowed fields
+
+            // Only update fields, not ID
             existingTransaction.Title = updatedTransaction.Title;
             existingTransaction.Amount = updatedTransaction.Amount;
             existingTransaction.Category = updatedTransaction.Category;
             existingTransaction.Type = updatedTransaction.Type;
             existingTransaction.Date = updatedTransaction.Date;
             existingTransaction.Notes = updatedTransaction.Notes;
+
             await _context.SaveChangesAsync();
             return Ok(existingTransaction);
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)

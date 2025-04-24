@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 import Analytics from "./pages/Analytics";
+import SavingGoal from "./pages/SavingGoal"; // ✅ Import component
 import ProtectedLayout from "./pages/ProtectedLayout";
 
 const App = () => {
@@ -35,6 +36,7 @@ const App = () => {
                     <Route element={<ProtectedLayout onLogout={handleLogout} />}>
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/analytics" element={<Analytics />} />
+                        <Route path="/saving-goals" element={<SavingGoal />} /> {/* ✅ Add this */}
                     </Route>
                 )}
 

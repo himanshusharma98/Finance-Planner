@@ -1,52 +1,59 @@
-﻿// ProtectedLayout.tsx
-import React from "react";
-import { Layout, Menu } from "antd";
+﻿import { Layout, Menu } from "antd";
 import {
+    PieChartOutlined,
     DashboardOutlined,
-    BarChartOutlined,
     LogoutOutlined,
+    DollarOutlined,
 } from "@ant-design/icons";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 
-const { Header, Content, Sider } = Layout;
+const { Header, Sider, Content } = Layout;
 
-const ProtectedLayout: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
+const ProtectedLayout = ({ onLogout }: { onLogout: () => void }) => {
     const navigate = useNavigate();
-    const location = useLocation();
 
-    const handleMenuClick = (key: string) => {
-        if (key === "logout") {
-            onLogout();
-            navigate("/login");
-        } else {
-            navigate(`/${key}`);
-        }
+    const handleLogout = () => {
+        onLogout();
+        navigate("/login");
     };
-
-    const selectedKey = location.pathname.replace("/", "") || "dashboard";
 
     return (
         <Layout style={{ minHeight: "100vh" }}>
             <Sider breakpoint="lg" collapsedWidth="0">
-                <div className="logo" style={{ color: "#fff", textAlign: "center", padding: "16px", fontWeight: "bold" }}>
+                <div
+                    style={{
+                        height: 32,
+                        margin: 16,
+                        background: "rgba(255,255,255,0.2)",
+                        color: "#fff",
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        lineHeight: "32px",
+                    }}
+                >
                     💰 Planner
                 </div>
-                <Menu
-                    theme="dark"
-                    mode="inline"
-                    selectedKeys={[selectedKey]}
-                    onClick={(e) => handleMenuClick(e.key)}
-                    items={[
-                        { key: "dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
-                        { key: "analytics", icon: <BarChartOutlined />, label: "Analytics" },
-                        { key: "logout", icon: <LogoutOutlined />, label: "Logout" },
-                    ]}
-                />
+                <Menu theme="dark" mode="inline" defaultSelectedKeys={["dashboard"]}>
+                    <Menu.Item key="dashboard" icon={<DashboardOutlined />}>
+                        <Link to="/dashboard">Dashboard</Link>
+                    </Menu.Item>
+                    <Menu.Item key="analytics" icon={<PieChartOutlined />}>
+                        <Link to="/analytics">Analytics</Link>
+                    </Menu.Item>
+                    <Menu.Item key="saving-goals" icon={<DollarOutlined />}>
+                        <Link to="/saving-goals">Saving Goals</Link>
+                    </Menu.Item>
+                    <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
+                        Logout
+                    </Menu.Item>
+                </Menu>
             </Sider>
             <Layout>
                 <Header style={{ background: "#fff", padding: 0 }} />
-                <Content style={{ margin: "16px" }}>
-                    <Outlet />
+                <Content style={{ margin: "24px 16px 0" }}>
+                    <div style={{ padding: 24, minHeight: 360 }}>
+                        <Outlet />
+                    </div>
                 </Content>
             </Layout>
         </Layout>
