@@ -1,8 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { Modal, Form, Input, InputNumber, Select, message } from "antd";
+﻿import React, { useEffect, useState } from "react";
+import {
+    Modal,
+    Form,
+    Input,
+    InputNumber,
+    Select,
+    message,
+    Typography,
+    Divider,
+    Space,
+} from "antd";
 import { SavingGoal } from "./SavingGoal";
 import api from "../services/api";
+import {
+    EditOutlined,
+    DollarCircleOutlined,
+    CheckCircleOutlined,
+    FlagOutlined,
+} from "@ant-design/icons";
 
+const { Title, Text } = Typography;
 const { Option } = Select;
 
 interface Props {
@@ -18,7 +35,7 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
     useEffect(() => {
         if (goal) {
             form.setFieldsValue(goal);
-            setIsChanged(false); // reset change detection
+            setIsChanged(false);
         }
     }, [goal, form]);
 
@@ -26,11 +43,11 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
         try {
             const values = await form.validateFields();
             await api.put(`/savinggoals/${goal.id}`, values);
-            message.success("Goal updated successfully");
+            message.success("🎯 Goal updated successfully");
             onUpdated();
             onClose();
         } catch (error) {
-            message.error("Failed to update goal");
+            message.error("❌ Failed to update goal");
         }
     };
 
@@ -47,14 +64,24 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
     return (
         <Modal
             open={true}
-            title={`Edit Goal: ${goal.title}`}
+            title={
+                <Space>
+                    <EditOutlined />
+                    <Title level={4} style={{ margin: 0 }}>
+                        Edit Saving Goal
+                    </Title>
+                </Space>
+            }
             onCancel={onClose}
             onOk={handleUpdate}
             okText="Update"
             cancelText="Cancel"
-            destroyOnClose
             okButtonProps={{ disabled: !isChanged }}
+            destroyOnClose
+            maskClosable={false}
         >
+            <Divider style={{ margin: "12px 0 24px" }} />
+
             <Form
                 layout="vertical"
                 form={form}
@@ -62,24 +89,42 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
                 onValuesChange={handleFormChange}
             >
                 <Form.Item name="title" label="Goal Title" rules={[{ required: true }]}>
-                    <Input />
+                    <Input prefix={<FlagOutlined />} placeholder="e.g. Buy a New Laptop" />
                 </Form.Item>
 
-                <Form.Item name="targetAmount" label="Target Amount" rules={[{ required: true }]}>
-                    <InputNumber min={100} style={{ width: "100%" }} />
+                <Form.Item name="targetAmount" label="Target Amount (₹)" rules={[{ required: true }]}>
+                    <InputNumber
+                        min={100}
+                        style={{ width: "100%" }}
+                        prefix={<DollarCircleOutlined />}
+                        placeholder="Enter your goal target"
+                    />
                 </Form.Item>
 
-                <Form.Item name="savedAmount" label="Saved Amount" rules={[{ required: true }]}>
-                    <InputNumber min={0} style={{ width: "100%" }} />
+                <Form.Item name="savedAmount" label="Saved So Far (₹)" rules={[{ required: true }]}>
+                    <InputNumber
+                        min={0}
+                        style={{ width: "100%" }}
+                        prefix={<DollarCircleOutlined />}
+                        placeholder="Amount saved so far"
+                    />
                 </Form.Item>
 
                 <Form.Item name="status" label="Goal Status" rules={[{ required: true }]}>
-                    <Select>
-                        <Option value="Active">Active</Option>
-                        <Option value="Completed">Completed</Option>
+                    <Select placeholder="Select goal status">
+                        <Option value="Active">
+                            <span style={{ color: "#1890ff" }}>Active</span>
+                        </Option>
+                        <Option value="Completed">
+                            <span style={{ color: "#52c41a" }}>Completed</span>
+                        </Option>
                     </Select>
                 </Form.Item>
             </Form>
+
+            <Text type="secondary" style={{ fontSize: 12 }}>
+                ✅ You can only update when there are changes. Be sure to double-check before saving!
+            </Text>
         </Modal>
     );
 };

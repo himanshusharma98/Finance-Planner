@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using FinancePlanner.API.Data;
+using FinancePlanner.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -40,6 +41,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 });
+builder.Services.AddHostedService<RecurringTransactionService>();
+
 
 builder.Services.AddSwaggerGen();
 
