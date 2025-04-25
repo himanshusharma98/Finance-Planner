@@ -5,6 +5,7 @@ import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 import Analytics from "./pages/Analytics";
 import SavingGoal from "./pages/SavingGoal"; // ✅ Import component
+import RecurringTransactionPage from "./pages/RecurringTransactionPage";
 import ProtectedLayout from "./pages/ProtectedLayout";
 
 const App = () => {
@@ -37,6 +38,7 @@ const App = () => {
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/analytics" element={<Analytics />} />
                         <Route path="/saving-goals" element={<SavingGoal />} /> {/* ✅ Add this */}
+                        <Route path="/recurring-transactions" element={<RecurringTransactionPage />} />
                     </Route>
                 )}
 

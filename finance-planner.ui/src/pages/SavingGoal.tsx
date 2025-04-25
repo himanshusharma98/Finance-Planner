@@ -8,15 +8,22 @@ import {
     InputNumber,
     Progress,
     Row,
-    Select,
-    message,
     Typography,
+    message,
+    Divider,
+    Space,
 } from "antd";
+import {
+    PlusOutlined,
+    EditOutlined,
+    DeleteOutlined,
+    AimOutlined,
+    FundOutlined,
+} from "@ant-design/icons";
 import api from "../services/api";
 import EditSavingGoal from "./EditSavingGoal";
 
-const { Title } = Typography;
-const { Option } = Select;
+const { Title, Text } = Typography;
 
 export interface SavingGoal {
     id: number;
@@ -27,7 +34,7 @@ export interface SavingGoal {
     status: "Active" | "Completed";
 }
 
-const SavingGoalPage: React.FC = () => {
+const SavingGoal: React.FC = () => {
     const [goals, setGoals] = useState<SavingGoal[]>([]);
     const [loading, setLoading] = useState(false);
     const [editingGoal, setEditingGoal] = useState<SavingGoal | null>(null);
@@ -72,24 +79,35 @@ const SavingGoalPage: React.FC = () => {
     }, []);
 
     return (
-        <div style={{ padding: 24 }}>
-            <Title level={2} style={{ marginBottom: 24 }}>💰 Saving Goals Tracker</Title>
+        <div style={{ padding: "32px", maxWidth: 1300, margin: "0 auto" }}>
+            <Title level={2} style={{ textAlign: "center", marginBottom: 32 }}>
+                🎯 Savings Goals Tracker
+            </Title>
 
             <Row gutter={24}>
+                {/* ➕ Add Goal Form */}
                 <Col xs={24} md={10}>
-                    <Card title="🎯 Add New Goal" bordered>
+                    <Card
+                        title={
+                            <Space>
+                                <AimOutlined /> Create New Goal
+                            </Space>
+                        }
+                        bordered={false}
+                        style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
+                    >
                         <Form layout="vertical" onFinish={handleAddGoal}>
                             <Form.Item name="title" label="Goal Title" rules={[{ required: true }]}>
-                                <Input placeholder="e.g. Vacation to Goa" />
+                                <Input placeholder="e.g. Europe Vacation" />
                             </Form.Item>
-                            <Form.Item name="targetAmount" label="Target Amount" rules={[{ required: true }]}>
+                            <Form.Item name="targetAmount" label="Target Amount (₹)" rules={[{ required: true }]}>
                                 <InputNumber min={100} style={{ width: "100%" }} />
                             </Form.Item>
-                            <Form.Item name="savedAmount" label="Amount Saved So Far" rules={[{ required: true }]}>
+                            <Form.Item name="savedAmount" label="Amount Already Saved (₹)" rules={[{ required: true }]}>
                                 <InputNumber min={0} style={{ width: "100%" }} />
                             </Form.Item>
                             <Form.Item>
-                                <Button type="primary" htmlType="submit" block>
+                                <Button type="primary" icon={<PlusOutlined />} htmlType="submit" block>
                                     Add Goal
                                 </Button>
                             </Form.Item>
@@ -97,34 +115,50 @@ const SavingGoalPage: React.FC = () => {
                     </Card>
                 </Col>
 
+                {/* 🧾 Existing Goals Display */}
                 <Col xs={24} md={14}>
                     <Row gutter={[16, 16]}>
                         {goals.map((goal) => (
-                            <Col span={24} key={goal.id}>
+                            <Col xs={24} key={goal.id}>
                                 <Card
-                                    title={`${goal.title}`}
+                                    hoverable
+                                    title={
+                                        <Space>
+                                            <FundOutlined />
+                                            {goal.title}
+                                        </Space>
+                                    }
+                                    style={{ borderRadius: 10 }}
                                     extra={
-                                        <>
-                                            <Button size="small" onClick={() => setEditingGoal(goal)}>
+                                        <Space>
+                                            <Button
+                                                icon={<EditOutlined />}
+                                                size="small"
+                                                onClick={() => setEditingGoal(goal)}
+                                            >
                                                 Edit
                                             </Button>
                                             <Button
-                                                danger
+                                                icon={<DeleteOutlined />}
                                                 size="small"
+                                                danger
                                                 onClick={() => handleDelete(goal.id)}
-                                                style={{ marginLeft: 8 }}
                                             >
                                                 Delete
                                             </Button>
-                                        </>
+                                        </Space>
                                     }
                                 >
-                                    <p>Status: {goal.status}</p>
-                                    <p>Saved: ₹{goal.savedAmount} / ₹{goal.targetAmount}</p>
+                                    <Text>Status: <strong>{goal.status}</strong></Text>
+                                    <br />
+                                    <Text>
+                                        Saved: <strong>₹{goal.savedAmount}</strong> of ₹{goal.targetAmount}
+                                    </Text>
                                     <Progress
                                         percent={Math.min((goal.savedAmount / goal.targetAmount) * 100, 100)}
                                         status={goal.status === "Completed" ? "success" : "active"}
-                                        strokeColor={goal.status === "Completed" ? "#52c41a" : undefined}
+                                        strokeColor={goal.status === "Completed" ? "#52c41a" : "#1890ff"}
+                                        style={{ marginTop: 8 }}
                                     />
                                 </Card>
                             </Col>
@@ -144,4 +178,4 @@ const SavingGoalPage: React.FC = () => {
     );
 };
 
-export default SavingGoalPage;
+export default SavingGoal;
