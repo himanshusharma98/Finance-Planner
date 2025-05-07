@@ -7,6 +7,7 @@ import Analytics from "./pages/Analytics";
 import SavingGoal from "./pages/SavingGoal"; // ✅ Import component
 import RecurringTransactionPage from "./pages/RecurringTransactionPage";
 import ProtectedLayout from "./pages/ProtectedLayout";
+import CalendarView from "./pages/CalendarView";
 
 const App = () => {
     const [token, setToken] = useState<string | null>(null);
@@ -39,6 +40,7 @@ const App = () => {
                         <Route path="/analytics" element={<Analytics />} />
                         <Route path="/saving-goals" element={<SavingGoal />} /> {/* ✅ Add this */}
                         <Route path="/recurring-transactions" element={<RecurringTransactionPage />} />
+                        <Route path="/calendar" element={<CalendarView />} />
                     </Route>
                 )}
 
