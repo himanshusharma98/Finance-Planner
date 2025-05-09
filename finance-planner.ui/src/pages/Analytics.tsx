@@ -13,39 +13,34 @@ import {
     DatePicker,
     Space,
     message,
+    Switch,
 } from "antd";
-import {
-    PieChart,
-    Pie,
-    Cell,
-    Tooltip,
-    ResponsiveContainer,
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Legend,
-} from "recharts";
 import dayjs from "dayjs";
+import { Chart } from "react-google-charts";
 
 const { Title } = Typography;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
-
-const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#82ca9d', '#f39c12', '#9b59b6'];
 
 const Analytics = () => {
     const [summary, setSummary] = useState({ income: 0, expense: 0, balance: 0 });
     const [categoryData, setCategoryData] = useState<any[]>([]);
     const [monthlyTrend, setMonthlyTrend] = useState<any[]>([]);
     const [allCategories, setAllCategories] = useState<string[]>([]);
-
     const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
     const [dateRange, setDateRange] = useState<[any, any] | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // ✅ Attach JWT token to Axios
+    const [is3D, setIs3D] = useState(() => {
+        const stored = localStorage.getItem("analytics_3d_mode");
+        return stored === null ? true : stored === "true";
+    });
+
+    const handle3DToggle = (checked: boolean) => {
+        setIs3D(checked);
+        localStorage.setItem("analytics_3d_mode", String(checked));
+    };
+
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -67,14 +62,12 @@ const Analytics = () => {
         setLoading(true);
 
         const baseParams: any = {};
-
         if (dateRange?.[0] && dateRange?.[1]) {
             baseParams.startDate = dayjs(dateRange[0]).format("YYYY-MM-DD");
             baseParams.endDate = dayjs(dateRange[1]).format("YYYY-MM-DD");
         }
 
         const summaryParams = { ...baseParams };
-
         if (selectedCategory && selectedCategory !== "") {
             summaryParams.category = selectedCategory;
         }
@@ -97,7 +90,7 @@ const Analytics = () => {
             });
 
             setMonthlyTrend(Object.values(groupedTrend));
-        } catch (err: any) {
+        } catch (err) {
             console.error("Analytics fetch error", err);
             message.error("Error fetching analytics data.");
         } finally {
@@ -116,10 +109,27 @@ const Analytics = () => {
         }
     };
 
+    const pieChartData = [
+        ["Category", "Amount"],
+        ...categoryData.map((item) => [item.category, item.total]),
+    ];
+
+    const lineChartData = [
+        ["Month", "Income", "Expense"],
+        ...monthlyTrend.map((item) => [item.label, item.income || 0, item.expense || 0]),
+    ];
+
     return (
         <div style={{ padding: "32px", maxWidth: "1400px", margin: "0 auto" }}>
             <Title level={2} style={{ textAlign: "center", marginBottom: 32 }}>
                 📊 Finance Analytics Dashboard
+                <Switch
+                    style={{ marginLeft: 16 }}
+                    checkedChildren="3D"
+                    unCheckedChildren="2D"
+                    checked={is3D}
+                    onChange={handle3DToggle}
+                />
             </Title>
 
             <Card style={{ marginBottom: 24 }} bordered={false} bodyStyle={{ padding: 16 }}>
@@ -138,10 +148,7 @@ const Analytics = () => {
                         ))}
                     </Select>
 
-                    <RangePicker
-                        onChange={(range) => setDateRange(range as any)}
-                        allowClear
-                    />
+                    <RangePicker onChange={(range) => setDateRange(range as any)} allowClear />
                 </Space>
             </Card>
 
@@ -189,57 +196,29 @@ const Analytics = () => {
                     <Row gutter={32}>
                         <Col xs={24} md={12}>
                             <Card title="📎 Category-wise Expenses" hoverable>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <PieChart>
-                                        <Pie
-                                            data={categoryData}
-                                            dataKey="total"
-                                            nameKey="category"
-                                            cx="50%"
-                                            cy="50%"
-                                            outerRadius={100}
-                                            label
-                                        >
-                                            {categoryData.map((_, index) => (
-                                                <Cell
-                                                    key={`cell-${index}`}
-                                                    fill={COLORS[index % COLORS.length]}
-                                                />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip />
-                                    </PieChart>
-                                </ResponsiveContainer>
+                                <Chart
+                                    chartType="PieChart"
+                                    data={pieChartData}
+                                    options={{ is3D: is3D }}
+                                    width="100%"
+                                    height="300px"
+                                />
                             </Card>
                         </Col>
 
                         <Col xs={24} md={12}>
                             <Card title="📅 Monthly Income vs Expense" hoverable>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <LineChart data={monthlyTrend}>
-                                        <CartesianGrid strokeDasharray="3 3" />
-                                        <XAxis dataKey="label" />
-                                        <YAxis />
-                                        <Tooltip />
-                                        <Legend />
-                                        <Line
-                                            type="monotone"
-                                            dataKey="income"
-                                            stroke="#36A2EB"
-                                            strokeWidth={2}
-                                            dot={false}
-                                            name="Income"
-                                        />
-                                        <Line
-                                            type="monotone"
-                                            dataKey="expense"
-                                            stroke="#FF6384"
-                                            strokeWidth={2}
-                                            dot={false}
-                                            name="Expense"
-                                        />
-                                    </LineChart>
-                                </ResponsiveContainer>
+                                <Chart
+                                    chartType="LineChart"
+                                    data={lineChartData}
+                                    options={{
+                                        is3D: is3D,
+                                        legend: { position: "bottom" },
+                                        curveType: "function",
+                                    }}
+                                    width="100%"
+                                    height="300px"
+                                />
                             </Card>
                         </Col>
                     </Row>
