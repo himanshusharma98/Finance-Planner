@@ -1,21 +1,21 @@
-﻿import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from "react";
 import {
-    Box,
     Typography,
-    Paper,
-    List,
-    ListItem,
-    ListItemText,
-    Divider,
-    Tooltip,
+    Row,
+    Col,
+    Card,
     Badge,
-    useTheme,
-} from '@mui/material';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { PickersDay, DateCalendar, PickersDayProps } from '@mui/x-date-pickers';
-import { format, isSameDay } from 'date-fns';
-import api from '../services/api';
+    Tooltip,
+    List,
+    Divider,
+    theme as antdTheme,
+} from "antd";
+import { Calendar } from "antd";
+import type { Dayjs } from "dayjs";
+import dayjs from "dayjs";
+import api from "../services/api";
+
+const { Title, Text } = Typography;
 
 interface EventItem {
     title: string;
@@ -25,177 +25,127 @@ interface EventItem {
 }
 
 const CalendarView: React.FC = () => {
-    const theme = useTheme();
     const [events, setEvents] = useState<EventItem[]>([]);
-    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
+    const { token: themeToken } = antdTheme.useToken();
 
     useEffect(() => {
-        const loadEvents = async () => {
+        const fetchEvents = async () => {
             try {
                 const [txnRes, goalRes] = await Promise.all([
-                    api.get('/transactions'),
-                    api.get('/savinggoals'),
+                    api.get("/transactions"),
+                    api.get("/savinggoals"),
                 ]);
 
                 const transactions = txnRes.data;
                 const goals = goalRes.data;
 
                 const txnEvents: EventItem[] = transactions.map((txn: any) => ({
-                    title: `${txn.type === 'Expense' ? '🟥' : '🟩'} ₹${txn.amount} - ${txn.category}`,
+                    title: `${txn.type === "Expense" ? "🟥" : "🟩"} ₹${txn.amount} - ${txn.category}`,
                     date: txn.date,
-                    color: txn.type === 'Expense' ? theme.palette.error.main : theme.palette.success.main,
+                    color: txn.type === "Expense" ? "#ff4d4f" : "#52c41a",
                     details: `Type: ${txn.type}\nCategory: ${txn.category}\nAmount: ₹${txn.amount}\nDate: ${txn.date}`,
                 }));
 
                 const goalEvents: EventItem[] = goals.map((goal: any) => ({
                     title: `🎯 ${goal.title} Due`,
                     date: goal.targetDate,
-                    color: theme.palette.primary.main,
+                    color: "#1890ff",
                     details: `Goal: ${goal.title}\nTarget Amount: ₹${goal.targetAmount}\nDue: ${goal.targetDate}`,
                 }));
 
                 setEvents([...txnEvents, ...goalEvents]);
             } catch (error) {
-                console.error('Error loading events:', error);
+                console.error("Error fetching calendar data:", error);
             }
         };
 
-        loadEvents();
-    }, [theme]);
+        fetchEvents();
+    }, []);
 
-    const isValidDate = (date: string) => {
-        const parsedDate = new Date(date);
-        return !isNaN(parsedDate.getTime());
-    };
-
-    const filteredEvents = events.filter((event) => {
-        return isValidDate(event.date) && isSameDay(new Date(event.date), selectedDate);
-    });
-
-    const renderDay = (
-        day: Date,
-        _value: Date | null,
-        DayComponentProps: PickersDayProps<Date>
-    ) => {
-        const formattedDay = format(day, 'yyyy-MM-dd');
-        const dayEvents = events.filter((event) => {
-            if (!isValidDate(event.date)) return false;
-            return format(new Date(event.date), 'yyyy-MM-dd') === formattedDay;
-        });
-
-        const hasEvent = dayEvents.length > 0;
-
-        return (
-            <Tooltip
-                title={
-                    hasEvent ? (
-                        <Box>
-                            {dayEvents.map((e, i) => (
-                                <Typography
-                                    key={i}
-                                    variant="caption"
-                                    style={{ color: e.color || '#555' }}
-                                >
-                                    {e.title}
-                                </Typography>
-                            ))}
-                        </Box>
-                    ) : ''
-                }
-                arrow
-                placement="top"
-            >
-                <Badge
-                    overlap="circular"
-                    color="secondary"
-                    variant={hasEvent ? 'dot' : undefined}
-                >
-                    <PickersDay {...DayComponentProps} />
-                </Badge>
-            </Tooltip>
+    const getEventsForDate = (date: Dayjs) => {
+        return events.filter(
+            (event) => dayjs(event.date).format("YYYY-MM-DD") === date.format("YYYY-MM-DD")
         );
     };
 
+    const dateCellRender = (date: Dayjs) => {
+        const dayEvents = getEventsForDate(date);
+
+        return (
+            <ul style={{ listStyle: "none", paddingLeft: 0, margin: 0 }}>
+                {dayEvents.map((event, index) => (
+                    <li key={index}>
+                        <Tooltip title={event.title}>
+                            <Badge color={event.color} />
+                        </Tooltip>
+                    </li>
+                ))}
+            </ul>
+        );
+    };
+
+    const onSelect = (date: Dayjs) => {
+        setSelectedDate(date);
+    };
+
+    const selectedDayEvents = getEventsForDate(selectedDate);
+
     return (
-        <Box
-            sx={{
-                display: 'flex',
-                flexDirection: { xs: 'column', md: 'row' },
-                gap: 3,
-                p: 4,
-                minHeight: '100vh',
-                bgcolor: theme.palette.background.default,
-            }}
-        >
-            <Paper
-                elevation={4}
-                sx={{
-                    p: 3,
-                    minWidth: 320,
-                    borderRadius: 3,
-                    bgcolor: theme.palette.background.paper,
-                }}
-            >
-                <Typography variant="h5" gutterBottom fontWeight="bold">
-                    📅 Calendar
-                </Typography>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <DateCalendar
-                        value={selectedDate}
-                        onChange={(newDate) => newDate && setSelectedDate(newDate)}
-                        slotProps={{
-                            day: (ownerState) => ({
-                                ...ownerState,
-                                children: renderDay(ownerState.day, selectedDate, ownerState),
-                            }),
-                        }}
-                    />
-                </LocalizationProvider>
-            </Paper>
+        <div style={{ padding: "32px" }}>
+            <Title level={2} style={{ textAlign: "center", marginBottom: "24px" }}>
+                📅 Calendar View
+            </Title>
 
-            <Paper
-                elevation={4}
-                sx={{
-                    flex: 1,
-                    p: 3,
-                    minHeight: 400,
-                    borderRadius: 3,
-                    bgcolor: theme.palette.background.paper,
-                }}
-            >
-                <Typography variant="h5" gutterBottom fontWeight="bold">
-                    Trabsactions & Goals on {format(selectedDate, 'dd MMM yyyy')}
-                </Typography>
+            <Row gutter={32}>
+                <Col xs={24} md={14}>
+                    <Card
+                        title="Select a Date"
+                        bordered
+                        style={{ borderRadius: 8, backgroundColor: themeToken.colorBgContainer }}
+                    >
+                        <Calendar
+                            fullscreen={true}
+                            value={selectedDate}
+                            onSelect={onSelect}
+                            dateCellRender={dateCellRender}
+                        />
+                    </Card>
+                </Col>
 
-                {filteredEvents.length > 0 ? (
-                    <List>
-                        {filteredEvents.map((event, idx) => (
-                            <React.Fragment key={idx}>
-                                <ListItem alignItems="flex-start">
-                                    <ListItemText
-                                        primary={
-                                            <span style={{ color: event.color || theme.palette.text.primary }}>
-                                                {event.title}
-                                            </span>
-                                        }
-                                        secondary={
-                                            event.details?.split('\n').map((line, i) => (
+                <Col xs={24} md={10}>
+                    <Card
+                        title={`Transactions & Saving Goals
+
+
+
+                        on ${selectedDate.format("DD MMM YYYY")}`}
+                        bordered
+                        style={{ borderRadius: 8, minHeight: 450 }}
+                    >
+                        {selectedDayEvents.length > 0 ? (
+                            <List
+                                itemLayout="vertical"
+                                dataSource={selectedDayEvents}
+                                renderItem={(event, idx) => (
+                                    <List.Item key={idx}>
+                                        <List.Item.Meta
+                                            title={<Text style={{ color: event.color }}>{event.title}</Text>}
+                                            description={event.details?.split("\n").map((line, i) => (
                                                 <div key={i}>{line}</div>
-                                            ))
-                                        }
-                                    />
-                                </ListItem>
-                                <Divider component="li" />
-                            </React.Fragment>
-                        ))}
-                    </List>
-                ) : (
-                    <Typography variant="body1" color="text.secondary">
-                        No transactions or goals for this date.
-                    </Typography>
-                )}
-            </Paper>
-        </Box>
+                                            ))}
+                                        />
+                                        <Divider style={{ margin: "12px 0" }} />
+                                    </List.Item>
+                                )}
+                            />
+                        ) : (
+                            <Text type="secondary">No transactions or goals for this date.</Text>
+                        )}
+                    </Card>
+                </Col>
+            </Row>
+        </div>
     );
 };
 
