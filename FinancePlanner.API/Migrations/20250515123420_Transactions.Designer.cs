@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinancePlanner.API.Migrations
 {
     [DbContext(typeof(FinanceDbContext))]
-    [Migration("20250505083528_Transactions")]
+    [Migration("20250515123420_Transactions")]
     partial class Transactions
     {
         /// <inheritdoc />
