@@ -8,8 +8,9 @@ import {
     CalendarOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useNavigate } from "react-router-dom";
+import MainLayout from "../pages/layouts/MainLayout"; // ✅ Import MainLayout
 
-const { Header, Sider, Content } = Layout;
+const { Sider } = Layout;
 
 const ProtectedLayout = ({ onLogout }: { onLogout: () => void }) => {
     const navigate = useNavigate();
@@ -45,7 +46,7 @@ const ProtectedLayout = ({ onLogout }: { onLogout: () => void }) => {
                     <Menu.Item key="saving-goals" icon={<DollarOutlined />}>
                         <Link to="/saving-goals">Saving Goals</Link>
                     </Menu.Item>
-                    <Menu.Item key="/recurring-transactions" icon={<ClockCircleOutlined />}> {/* ✅ */}
+                    <Menu.Item key="/recurring-transactions" icon={<ClockCircleOutlined />}>
                         <Link to="/recurring-transactions">Recurring Trans.</Link>
                     </Menu.Item>
                     <Menu.Item key="calendar" icon={<CalendarOutlined />}>
@@ -56,14 +57,11 @@ const ProtectedLayout = ({ onLogout }: { onLogout: () => void }) => {
                     </Menu.Item>
                 </Menu>
             </Sider>
-            <Layout>
-                <Header style={{ background: "#fff", padding: 0 }} />
-                <Content style={{ margin: "24px 16px 0" }}>
-                    <div style={{ padding: 24, minHeight: 360 }}>
-                        <Outlet />
-                    </div>
-                </Content>
-            </Layout>
+
+            {/* Wrap outlet in main layout to show header and footer */}
+            <MainLayout>
+                <Outlet />
+            </MainLayout>
         </Layout>
     );
 };
