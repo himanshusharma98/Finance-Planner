@@ -42,7 +42,6 @@ const EditTransactionModal = ({ open, transaction, onClose, onUpdate }: Props) =
         try {
             const values = await form.validateFields();
 
-            // ✅ Remove ID from payload
             const payload = {
                 title: values.title,
                 amount: values.amount,
@@ -58,7 +57,7 @@ const EditTransactionModal = ({ open, transaction, onClose, onUpdate }: Props) =
             onUpdate();
             onClose();
         } catch (error) {
-            message.error("❌ Failed to update transaction. Please try again.");
+            message.error("❌ Failed to update transaction. Please check the inputs.");
         } finally {
             setSaving(false);
         }
@@ -94,26 +93,46 @@ const EditTransactionModal = ({ open, transaction, onClose, onUpdate }: Props) =
             <Divider style={{ margin: "12px 0" }} />
 
             <Form layout="vertical" form={form} onValuesChange={checkIfChanged}>
-                <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+                <Form.Item
+                    name="title"
+                    label="Title"
+                    rules={[{ required: true, message: "Title is required" }]}
+                >
                     <Input placeholder="Enter transaction title" />
                 </Form.Item>
 
-                <Form.Item name="amount" label="Amount (₹)" rules={[{ required: true }]}>
+                <Form.Item
+                    name="amount"
+                    label="Amount (₹)"
+                    rules={[{ required: true, message: "Amount is required" }]}
+                >
                     <Input type="number" placeholder="Enter amount" />
                 </Form.Item>
 
-                <Form.Item name="category" label="Category" rules={[{ required: true }]}>
+                <Form.Item
+                    name="category"
+                    label="Category"
+                    rules={[{ required: true, message: "Category is required" }]}
+                >
                     <Input placeholder="e.g. Rent, Food, Salary" />
                 </Form.Item>
 
-                <Form.Item name="type" label="Type" rules={[{ required: true }]}>
-                    <Select>
+                <Form.Item
+                    name="type"
+                    label="Type"
+                    rules={[{ required: true, message: "Transaction type is required" }]}
+                >
+                    <Select placeholder="Select type">
                         <Option value="Income">Income</Option>
                         <Option value="Expense">Expense</Option>
                     </Select>
                 </Form.Item>
 
-                <Form.Item name="date" label="Date" rules={[{ required: true }]}>
+                <Form.Item
+                    name="date"
+                    label="Date"
+                    rules={[{ required: true, message: "Date is required" }]}
+                >
                     <DatePicker style={{ width: "100%" }} />
                 </Form.Item>
 

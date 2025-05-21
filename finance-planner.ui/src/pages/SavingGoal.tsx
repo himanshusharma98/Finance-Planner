@@ -38,6 +38,7 @@ const SavingGoal: React.FC = () => {
     const [goals, setGoals] = useState<SavingGoal[]>([]);
     const [loading, setLoading] = useState(false);
     const [editingGoal, setEditingGoal] = useState<SavingGoal | null>(null);
+    const [form] = Form.useForm(); // 🔁 Used to reset form
 
     const fetchGoals = async () => {
         setLoading(true);
@@ -45,7 +46,7 @@ const SavingGoal: React.FC = () => {
             const res = await api.get("/savinggoals");
             setGoals(res.data);
         } catch {
-            message.error("Failed to fetch saving goals");
+            message.error("Failed to fetch saving goals.");
         } finally {
             setLoading(false);
         }
@@ -57,20 +58,21 @@ const SavingGoal: React.FC = () => {
                 ...values,
                 status: "Active",
             });
-            message.success("Goal added successfully");
+            message.success("🎯 Goal added successfully!");
+            form.resetFields(); // ✅ Clear form after success
             fetchGoals();
         } catch {
-            message.error("Failed to add goal");
+            message.error("❌ Failed to add goal. Please try again.");
         }
     };
 
     const handleDelete = async (id: number) => {
         try {
             await api.delete(`/savinggoals/${id}`);
-            message.success("Goal deleted");
+            message.success("🗑️ Goal deleted.");
             fetchGoals();
         } catch {
-            message.error("Failed to delete goal");
+            message.error("❌ Failed to delete goal.");
         }
     };
 
@@ -96,16 +98,31 @@ const SavingGoal: React.FC = () => {
                         bordered={false}
                         style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
                     >
-                        <Form layout="vertical" onFinish={handleAddGoal}>
-                            <Form.Item name="title" label="Goal Title" rules={[{ required: true }]}>
+                        <Form layout="vertical" form={form} onFinish={handleAddGoal}>
+                            <Form.Item
+                                name="title"
+                                label="Goal Title"
+                                rules={[{ required: true, message: "Title is required" }]}
+                            >
                                 <Input placeholder="e.g. Europe Vacation" />
                             </Form.Item>
-                            <Form.Item name="targetAmount" label="Target Amount (₹)" rules={[{ required: true }]}>
-                                <InputNumber min={100} style={{ width: "100%" }} />
+
+                            <Form.Item
+                                name="targetAmount"
+                                label="Target Amount (₹)"
+                                rules={[{ required: true, message: "Target amount is required" }]}
+                            >
+                                <InputNumber min={100} style={{ width: "100%" }} placeholder="e.g. 50000" />
                             </Form.Item>
-                            <Form.Item name="savedAmount" label="Amount Already Saved (₹)" rules={[{ required: true }]}>
-                                <InputNumber min={0} style={{ width: "100%" }} />
+
+                            <Form.Item
+                                name="savedAmount"
+                                label="Amount Already Saved (₹)"
+                                rules={[{ required: true, message: "Saved amount is required" }]}
+                            >
+                                <InputNumber min={0} style={{ width: "100%" }} placeholder="e.g. 5000" />
                             </Form.Item>
+
                             <Form.Item>
                                 <Button type="primary" icon={<PlusOutlined />} htmlType="submit" block>
                                     Add Goal

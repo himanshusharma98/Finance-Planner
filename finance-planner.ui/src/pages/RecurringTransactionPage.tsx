@@ -11,7 +11,6 @@ import {
     Table,
     Popconfirm,
     Typography,
-    Divider,
     Row,
     Col,
     Space,
@@ -21,7 +20,7 @@ import { RecurringTransaction } from "../types/recurringTransaction";
 import dayjs from "dayjs";
 
 const { Option } = Select;
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const RecurringTransactionPage: React.FC = () => {
     const [form] = Form.useForm();
@@ -45,7 +44,7 @@ const RecurringTransactionPage: React.FC = () => {
             await api.post("/recurringtransaction", {
                 ...values,
                 startDate: values.startDate.format("YYYY-MM-DD"),
-                endDate: values.endDate?.format("YYYY-MM-DD")
+                endDate: values.endDate?.format("YYYY-MM-DD"),
             });
             message.success("✅ Recurring transaction created");
             form.resetFields();
@@ -76,6 +75,7 @@ const RecurringTransactionPage: React.FC = () => {
             </Title>
 
             <Row gutter={32}>
+                {/* Form */}
                 <Col xs={24} md={10}>
                     <Card
                         title="➕ Create New Recurring"
@@ -84,26 +84,46 @@ const RecurringTransactionPage: React.FC = () => {
                         style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
                     >
                         <Form layout="vertical" form={form} onFinish={onFinish}>
-                            <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+                            <Form.Item
+                                name="title"
+                                label="Title"
+                                rules={[{ required: true, message: "Please enter a title" }]}
+                            >
                                 <Input placeholder="e.g. Rent, Netflix, Salary" />
                             </Form.Item>
 
-                            <Form.Item name="amount" label="Amount" rules={[{ required: true }]}>
+                            <Form.Item
+                                name="amount"
+                                label="Amount"
+                                rules={[{ required: true, message: "Please enter the amount" }]}
+                            >
                                 <InputNumber min={1} style={{ width: "100%" }} prefix="₹" />
                             </Form.Item>
 
-                            <Form.Item name="category" label="Category" rules={[{ required: true }]}>
+                            <Form.Item
+                                name="category"
+                                label="Category"
+                                rules={[{ required: true, message: "Please enter a category" }]}
+                            >
                                 <Input placeholder="e.g. Subscription, Salary" />
                             </Form.Item>
 
-                            <Form.Item name="type" label="Type" rules={[{ required: true }]}>
+                            <Form.Item
+                                name="type"
+                                label="Type"
+                                rules={[{ required: true, message: "Please select a type" }]}
+                            >
                                 <Select placeholder="Select transaction type">
                                     <Option value="Income">Income</Option>
                                     <Option value="Expense">Expense</Option>
                                 </Select>
                             </Form.Item>
 
-                            <Form.Item name="frequency" label="Frequency" rules={[{ required: true }]}>
+                            <Form.Item
+                                name="frequency"
+                                label="Frequency"
+                                rules={[{ required: true, message: "Please select a frequency" }]}
+                            >
                                 <Select placeholder="How often?">
                                     <Option value="Daily">Daily</Option>
                                     <Option value="Weekly">Weekly</Option>
@@ -111,7 +131,11 @@ const RecurringTransactionPage: React.FC = () => {
                                 </Select>
                             </Form.Item>
 
-                            <Form.Item name="startDate" label="Start Date" rules={[{ required: true }]}>
+                            <Form.Item
+                                name="startDate"
+                                label="Start Date"
+                                rules={[{ required: true, message: "Please select a start date" }]}
+                            >
                                 <DatePicker style={{ width: "100%" }} />
                             </Form.Item>
 
@@ -128,6 +152,7 @@ const RecurringTransactionPage: React.FC = () => {
                     </Card>
                 </Col>
 
+                {/* Table */}
                 <Col xs={24} md={14}>
                     <Card
                         title="📅 Existing Recurring Transactions"
