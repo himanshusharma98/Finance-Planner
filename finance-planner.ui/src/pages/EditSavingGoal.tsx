@@ -47,7 +47,7 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
             onUpdated();
             onClose();
         } catch (error) {
-            message.error("❌ Failed to update goal");
+            message.error("❌ Failed to update goal. Please try again.");
         }
     };
 
@@ -88,11 +88,19 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
                 initialValues={goal}
                 onValuesChange={handleFormChange}
             >
-                <Form.Item name="title" label="Goal Title" rules={[{ required: true }]}>
+                <Form.Item
+                    name="title"
+                    label="Goal Title"
+                    rules={[{ required: true, message: "Please enter a title" }]}
+                >
                     <Input prefix={<FlagOutlined />} placeholder="e.g. Buy a New Laptop" />
                 </Form.Item>
 
-                <Form.Item name="targetAmount" label="Target Amount (₹)" rules={[{ required: true }]}>
+                <Form.Item
+                    name="targetAmount"
+                    label="Target Amount (₹)"
+                    rules={[{ required: true, message: "Please enter the target amount" }]}
+                >
                     <InputNumber
                         min={100}
                         style={{ width: "100%" }}
@@ -101,7 +109,11 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
                     />
                 </Form.Item>
 
-                <Form.Item name="savedAmount" label="Saved So Far (₹)" rules={[{ required: true }]}>
+                <Form.Item
+                    name="savedAmount"
+                    label="Saved So Far (₹)"
+                    rules={[{ required: true, message: "Please enter the saved amount" }]}
+                >
                     <InputNumber
                         min={0}
                         style={{ width: "100%" }}
@@ -110,7 +122,11 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
                     />
                 </Form.Item>
 
-                <Form.Item name="status" label="Goal Status" rules={[{ required: true }]}>
+                <Form.Item
+                    name="status"
+                    label="Goal Status"
+                    rules={[{ required: true, message: "Please select the goal status" }]}
+                >
                     <Select placeholder="Select goal status">
                         <Option value="Active">
                             <span style={{ color: "#1890ff" }}>Active</span>
