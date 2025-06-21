@@ -39,7 +39,7 @@ namespace FinancePlannerAPI.Controllers
             {
                 Username = request.Username,
                 Email = request.Email,
-                Password = request.Password // ⚠️ plain text as per your setup
+                Password = request.Password // ⚠️ Note: plain text
             };
 
             _context.Users.Add(newUser);
@@ -55,7 +55,7 @@ namespace FinancePlannerAPI.Controllers
             var user = _context.Users.FirstOrDefault(u =>
                 (u.Username.ToLower() == request.Username.ToLower() ||
                  u.Email.ToLower() == request.Username.ToLower()) &&
-                 u.Password == request.Password);
+                u.Password == request.Password);
 
             if (user == null)
             {
@@ -63,7 +63,13 @@ namespace FinancePlannerAPI.Controllers
             }
 
             var token = CreateJwtToken(user);
-            return Ok(new { token });
+
+            // ✅ Return token + username
+            return Ok(new
+            {
+                token = token,
+                username = user.Username
+            });
         }
 
         // ✅ JWT TOKEN CREATION
@@ -75,10 +81,7 @@ namespace FinancePlannerAPI.Controllers
                 new Claim(ClaimTypes.Email, user.Email)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                _configuration["Jwt:Key"]
-            ));
-
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(

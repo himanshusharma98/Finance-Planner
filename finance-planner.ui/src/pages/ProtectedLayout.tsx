@@ -6,6 +6,7 @@ import {
     DollarOutlined,
     ClockCircleOutlined,
     CalendarOutlined,
+    UserOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import MainLayout from "../pages/layouts/MainLayout"; // ✅ Import MainLayout
@@ -51,6 +52,9 @@ const ProtectedLayout = ({ onLogout }: { onLogout: () => void }) => {
                     </Menu.Item>
                     <Menu.Item key="calendar" icon={<CalendarOutlined />}>
                         <Link to="/calendar">Calendar</Link>
+                    </Menu.Item>
+                    <Menu.Item key="profile" icon={<UserOutlined />}>
+                        <Link to="/profile">Profile</Link>
                     </Menu.Item>
                     <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
                         Logout

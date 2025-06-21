@@ -8,6 +8,8 @@ import SavingGoal from "./pages/SavingGoal"; // ✅ Import component
 import RecurringTransactionPage from "./pages/RecurringTransactionPage";
 import ProtectedLayout from "./pages/ProtectedLayout";
 import CalendarView from "./pages/CalendarView";
+import UserProfile from "./pages/UserProfile";
+import { ThemeProvider } from "./themes/ThemeContext";
 
 const App = () => {
     const [token, setToken] = useState<string | null>(null);
@@ -28,11 +30,13 @@ const App = () => {
     };
 
     return (
+        <ThemeProvider>
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Navigate to={token ? "/dashboard" : "/login"} />} />
                 <Route path="/login" element={token ? <Navigate to="/dashboard" /> : <Login onLogin={handleLogin} />} />
                 <Route path="/signup" element={token ? <Navigate to="/dashboard" /> : <SignUp />} />
+
 
                 {token && (
                     <Route element={<ProtectedLayout onLogout={handleLogout} />}>
@@ -41,12 +45,14 @@ const App = () => {
                         <Route path="/saving-goals" element={<SavingGoal />} /> {/* ✅ Add this */}
                         <Route path="/recurring-transactions" element={<RecurringTransactionPage />} />
                         <Route path="/calendar" element={<CalendarView />} />
+                        <Route path="/profile" element={<UserProfile />} />
                     </Route>
                 )}
 
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>
-        </BrowserRouter>
+            </BrowserRouter>
+        </ThemeProvider>
     );
 };
 
