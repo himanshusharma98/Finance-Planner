@@ -17,6 +17,7 @@ const Login: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
             });
 
             localStorage.setItem("token", res.data.token);
+            localStorage.setItem("username", res.data.username);
             message.success("🎉 Login successful!");
             onLogin();
             navigate("/dashboard");

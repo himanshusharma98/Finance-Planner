@@ -1,1 +1,33 @@
+/* Light Theme (default) */
+body.light-theme {
+    background: #f5f5f5;
+    color: #000;
+}
+
+/* Dark Theme */
+body.dark-theme {
+    background: #141414;
+    color: #fff;
+}
+
+    body.dark-theme .ant-card,
+    body.dark-theme .ant-input,
+    body.dark-theme .ant-select,
+    body.dark-theme .ant-form-item-label > label {
+        background-color: #1f1f1f !important;
+        color: #fff !important;
+    }
+
+    body.dark-theme .ant-btn-primary {
+        background-color: #1890ff;
+    }
+body.light-theme {
+    background-color: #fff;
+    color: #000;
+}
+
+body.dark-theme {
+    background-color: #141414;
+    color: #fff;
+}
 
