@@ -6,11 +6,11 @@ import {
     Form,
     Input,
     InputNumber,
+    DatePicker,
     Progress,
     Row,
     Typography,
     message,
-    Divider,
     Space,
 } from "antd";
 import {
@@ -22,6 +22,7 @@ import {
 } from "@ant-design/icons";
 import api from "../services/api";
 import EditSavingGoal from "./EditSavingGoal";
+import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
 
@@ -32,13 +33,14 @@ export interface SavingGoal {
     targetAmount: number;
     savedAmount: number;
     status: "Active" | "Completed";
+    targetDate?: string;
 }
 
 const SavingGoal: React.FC = () => {
     const [goals, setGoals] = useState<SavingGoal[]>([]);
     const [loading, setLoading] = useState(false);
     const [editingGoal, setEditingGoal] = useState<SavingGoal | null>(null);
-    const [form] = Form.useForm(); // 🔁 Used to reset form
+    const [form] = Form.useForm();
 
     const fetchGoals = async () => {
         setLoading(true);
@@ -54,12 +56,14 @@ const SavingGoal: React.FC = () => {
 
     const handleAddGoal = async (values: any) => {
         try {
-            await api.post("/savinggoals", {
+            const payload = {
                 ...values,
                 status: "Active",
-            });
+                targetDate: values.targetDate ? values.targetDate.format("YYYY-MM-DD") : null,
+            };
+            await api.post("/savinggoals", payload);
             message.success("🎯 Goal added successfully!");
-            form.resetFields(); // ✅ Clear form after success
+            form.resetFields();
             fetchGoals();
         } catch {
             message.error("❌ Failed to add goal. Please try again.");
@@ -87,44 +91,40 @@ const SavingGoal: React.FC = () => {
             </Title>
 
             <Row gutter={24}>
-                {/* ➕ Add Goal Form */}
+                {/* ➕ Create New Goal Form */}
                 <Col xs={24} md={10}>
-                    <Card
-                        title={
-                            <Space>
-                                <AimOutlined /> Create New Goal
-                            </Space>
-                        }
-                        bordered={false}
-                        style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
-                    >
+                    <Card title={<Space><AimOutlined /> Create New Goal</Space>} bordered={false}>
                         <Form layout="vertical" form={form} onFinish={handleAddGoal}>
                             <Form.Item
                                 name="title"
                                 label="Goal Title"
-                                rules={[{ required: true, message: "Title is required" }]}
+                                rules={[{ required: true, message: "Please enter a goal title" }]}
                             >
-                                <Input placeholder="e.g. Europe Vacation" />
+                                <Input placeholder="e.g. Buy a Car" />
                             </Form.Item>
 
                             <Form.Item
                                 name="targetAmount"
                                 label="Target Amount (₹)"
-                                rules={[{ required: true, message: "Target amount is required" }]}
+                                rules={[{ required: true, message: "Please enter the target amount" }]}
                             >
-                                <InputNumber min={100} style={{ width: "100%" }} placeholder="e.g. 50000" />
+                                <InputNumber min={100} style={{ width: "100%" }} />
                             </Form.Item>
 
                             <Form.Item
                                 name="savedAmount"
-                                label="Amount Already Saved (₹)"
-                                rules={[{ required: true, message: "Saved amount is required" }]}
+                                label="Saved Amount (₹)"
+                                rules={[{ required: true, message: "Please enter the saved amount" }]}
                             >
-                                <InputNumber min={0} style={{ width: "100%" }} placeholder="e.g. 5000" />
+                                <InputNumber min={0} style={{ width: "100%" }} />
+                            </Form.Item>
+
+                            <Form.Item name="targetDate" label="Target Date">
+                                <DatePicker style={{ width: "100%" }} />
                             </Form.Item>
 
                             <Form.Item>
-                                <Button type="primary" icon={<PlusOutlined />} htmlType="submit" block>
+                                <Button type="primary" htmlType="submit" block icon={<PlusOutlined />}>
                                     Add Goal
                                 </Button>
                             </Form.Item>
@@ -139,42 +139,22 @@ const SavingGoal: React.FC = () => {
                             <Col xs={24} key={goal.id}>
                                 <Card
                                     hoverable
-                                    title={
-                                        <Space>
-                                            <FundOutlined />
-                                            {goal.title}
-                                        </Space>
-                                    }
-                                    style={{ borderRadius: 10 }}
+                                    title={<Space><FundOutlined /> {goal.title}</Space>}
                                     extra={
                                         <Space>
-                                            <Button
-                                                icon={<EditOutlined />}
-                                                size="small"
-                                                onClick={() => setEditingGoal(goal)}
-                                            >
-                                                Edit
-                                            </Button>
-                                            <Button
-                                                icon={<DeleteOutlined />}
-                                                size="small"
-                                                danger
-                                                onClick={() => handleDelete(goal.id)}
-                                            >
-                                                Delete
-                                            </Button>
+                                            <Button icon={<EditOutlined />} size="small" onClick={() => setEditingGoal(goal)}>Edit</Button>
+                                            <Button icon={<DeleteOutlined />} size="small" danger onClick={() => handleDelete(goal.id)}>Delete</Button>
                                         </Space>
                                     }
                                 >
-                                    <Text>Status: <strong>{goal.status}</strong></Text>
-                                    <br />
-                                    <Text>
-                                        Saved: <strong>₹{goal.savedAmount}</strong> of ₹{goal.targetAmount}
-                                    </Text>
+                                    <Text>Status: <strong>{goal.status}</strong></Text><br />
+                                    <Text>Saved: <strong>₹{goal.savedAmount}</strong> of ₹{goal.targetAmount}</Text><br />
+                                    {goal.targetDate && (
+                                        <Text>Target Date: <strong>{dayjs(goal.targetDate).format("DD MMM YYYY")}</strong></Text>
+                                    )}
                                     <Progress
                                         percent={Math.min((goal.savedAmount / goal.targetAmount) * 100, 100)}
                                         status={goal.status === "Completed" ? "success" : "active"}
-                                        strokeColor={goal.status === "Completed" ? "#52c41a" : "#1890ff"}
                                         style={{ marginTop: 8 }}
                                     />
                                 </Card>
@@ -184,6 +164,7 @@ const SavingGoal: React.FC = () => {
                 </Col>
             </Row>
 
+            {/* ✏️ Edit Modal */}
             {editingGoal && (
                 <EditSavingGoal
                     goal={editingGoal}

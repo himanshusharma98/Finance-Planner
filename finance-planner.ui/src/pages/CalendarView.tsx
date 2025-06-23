@@ -44,15 +44,17 @@ const CalendarView: React.FC = () => {
                     title: `${txn.type === "Expense" ? "🟥" : "🟩"} ₹${txn.amount} - ${txn.category}`,
                     date: txn.date,
                     color: txn.type === "Expense" ? "#ff4d4f" : "#52c41a",
-                    details: `Type: ${txn.type}\nCategory: ${txn.category}\nAmount: ₹${txn.amount}\nDate: ${txn.date}`,
+                    details: `Type: ${txn.type}\nCategory: ${txn.category}\nAmount: ₹${txn.amount}\nDate: ${dayjs(txn.date).format("DD MMM YYYY")}`,
                 }));
 
-                const goalEvents: EventItem[] = goals.map((goal: any) => ({
-                    title: `🎯 ${goal.title} Due`,
-                    date: goal.targetDate,
-                    color: "#1890ff",
-                    details: `Goal: ${goal.title}\nTarget Amount: ₹${goal.targetAmount}\nDue: ${goal.targetDate}`,
-                }));
+                const goalEvents: EventItem[] = goals
+                    .filter((goal: any) => goal.targetDate && dayjs(goal.targetDate).isValid())
+                    .map((goal: any) => ({
+                        title: `🎯 ${goal.title} Due`,
+                        date: goal.targetDate,
+                        color: "#1890ff",
+                        details: `Goal: ${goal.title}\nTarget Amount: ₹${goal.targetAmount}\nDue: ${dayjs(goal.targetDate).format("DD MMM YYYY")}`,
+                    }));
 
                 setEvents([...txnEvents, ...goalEvents]);
             } catch (error) {
@@ -115,11 +117,7 @@ const CalendarView: React.FC = () => {
 
                 <Col xs={24} md={10}>
                     <Card
-                        title={`Transactions & Saving Goals
-
-
-
-                        on ${selectedDate.format("DD MMM YYYY")}`}
+                        title={`Transactions & Saving Goals on ${selectedDate.format("DD MMM YYYY")}`}
                         bordered
                         style={{ borderRadius: 8, minHeight: 450 }}
                     >

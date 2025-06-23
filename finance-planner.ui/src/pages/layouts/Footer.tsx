@@ -15,7 +15,7 @@ const AppFooter: React.FC = () => {
             }}
         >
             <Text style={{ color: "#ccc" }}>
-                © {new Date().getFullYear()} Finance Planner · All rights reserved
+                {"\u00A9"} {new Date().getFullYear()} Finance Planner &middot; All rights reserved
             </Text>
         </Footer>
     );
