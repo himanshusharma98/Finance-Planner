@@ -5,6 +5,7 @@ import {
     Input,
     InputNumber,
     Select,
+    DatePicker,
     message,
     Typography,
     Divider,
@@ -17,7 +18,9 @@ import {
     DollarCircleOutlined,
     CheckCircleOutlined,
     FlagOutlined,
+    CalendarOutlined,
 } from "@ant-design/icons";
+import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -34,7 +37,10 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
 
     useEffect(() => {
         if (goal) {
-            form.setFieldsValue(goal);
+            form.setFieldsValue({
+                ...goal,
+                targetDate: goal.targetDate ? dayjs(goal.targetDate) : null,
+            });
             setIsChanged(false);
         }
     }, [goal, form]);
@@ -42,12 +48,17 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
     const handleUpdate = async () => {
         try {
             const values = await form.validateFields();
-            await api.put(`/savinggoals/${goal.id}`, values);
+            const updatedGoal = {
+                ...values,
+                targetDate: values.targetDate ? values.targetDate.format("YYYY-MM-DD") : null,
+            };
+
+            await api.put(`/savinggoals/${goal.id}`, updatedGoal);
             message.success("🎯 Goal updated successfully");
             onUpdated();
             onClose();
-        } catch (error) {
-            message.error("❌ Failed to update goal. Please try again.");
+        } catch {
+            message.error("❌ Failed to update goal");
         }
     };
 
@@ -56,7 +67,10 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
             allValues.title !== goal.title ||
             allValues.targetAmount !== goal.targetAmount ||
             allValues.savedAmount !== goal.savedAmount ||
-            allValues.status !== goal.status;
+            allValues.status !== goal.status ||
+            (goal.targetDate
+                ? !dayjs(goal.targetDate).isSame(allValues.targetDate, "day")
+                : !!allValues.targetDate);
 
         setIsChanged(changed);
     };
@@ -85,7 +99,6 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
             <Form
                 layout="vertical"
                 form={form}
-                initialValues={goal}
                 onValuesChange={handleFormChange}
             >
                 <Form.Item
@@ -99,7 +112,7 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
                 <Form.Item
                     name="targetAmount"
                     label="Target Amount (₹)"
-                    rules={[{ required: true, message: "Please enter the target amount" }]}
+                    rules={[{ required: true, message: "Please enter target amount" }]}
                 >
                     <InputNumber
                         min={100}
@@ -112,7 +125,7 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
                 <Form.Item
                     name="savedAmount"
                     label="Saved So Far (₹)"
-                    rules={[{ required: true, message: "Please enter the saved amount" }]}
+                    rules={[{ required: true, message: "Please enter saved amount" }]}
                 >
                     <InputNumber
                         min={0}
@@ -125,7 +138,7 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
                 <Form.Item
                     name="status"
                     label="Goal Status"
-                    rules={[{ required: true, message: "Please select the goal status" }]}
+                    rules={[{ required: true, message: "Please select a status" }]}
                 >
                     <Select placeholder="Select goal status">
                         <Option value="Active">
@@ -136,10 +149,18 @@ const EditSavingGoal: React.FC<Props> = ({ goal, onClose, onUpdated }) => {
                         </Option>
                     </Select>
                 </Form.Item>
+
+                <Form.Item name="targetDate" label="Target Date">
+                    <DatePicker
+                        style={{ width: "100%" }}
+                        placeholder="Select due date"
+                        suffixIcon={<CalendarOutlined />}
+                    />
+                </Form.Item>
             </Form>
 
             <Text type="secondary" style={{ fontSize: 12 }}>
-                ✅ You can only update when there are changes. Be sure to double-check before saving!
+                ✅ You can only update when changes are detected.
             </Text>
         </Modal>
     );

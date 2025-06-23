@@ -8,5 +8,6 @@
         public decimal TargetAmount { get; set; }
         public decimal SavedAmount { get; set; }
         public string Status { get; set; } = "Active";
+        public DateTime? TargetDate { get; set; }
     }
 }
