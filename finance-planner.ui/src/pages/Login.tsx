@@ -41,7 +41,13 @@ const Login: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
                 style={{ width: 400, boxShadow: "0 0 20px rgba(0,0,0,0.05)" }}
                 bordered={false}
             >
-                <div style={{ textAlign: "center", marginBottom: 24 }}>
+                <div style={{ textAlign: "center", marginBottom: 16 }}>
+                    <img
+                        src="https://ik.imagekit.io/pzh1tjej22d/Finance%20Planner%20Logo/logo_xnVTbUffJF.png?updatedAt=1750766745531
+" 
+                        alt="Finance Planner Logo"
+                        style={{ width: "80px", marginBottom: 8 }}
+                    />
                     <Title level={3}>🔐 Login to Finance Planner</Title>
                     <Text type="secondary">Welcome back! Please enter your credentials</Text>
                 </div>
@@ -71,8 +77,7 @@ const Login: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
 
                     <Form.Item style={{ textAlign: "center", marginBottom: 0 }}>
                         <Text type="secondary">
-                            Don't have an account?{" "}
-                            <Link to="/signup">Sign Up</Link>
+                            Don't have an account? <Link to="/signup">Sign Up</Link>
                         </Text>
                     </Form.Item>
                 </Form>

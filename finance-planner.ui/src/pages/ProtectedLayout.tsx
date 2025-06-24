@@ -35,7 +35,7 @@ const ProtectedLayout = ({ onLogout }: { onLogout: () => void }) => {
                         lineHeight: "32px",
                     }}
                 >
-                    💰 Planner
+                    Finance Planner
                 </div>
                 <Menu theme="dark" mode="inline" defaultSelectedKeys={["dashboard"]}>
                     <Menu.Item key="dashboard" icon={<DashboardOutlined />}>
