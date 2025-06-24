@@ -6,6 +6,9 @@ import api from "../services/api";
 
 const { Title, Text } = Typography;
 
+// CDN logo URL (you can replace with your own if preferred)
+const logoUrl = "https://ik.imagekit.io/pzh1tjej22d/Finance%20Planner%20Logo/logo_xnVTbUffJF.png?updatedAt=1750766745531";
+
 const SignUp: React.FC = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -17,7 +20,7 @@ const SignUp: React.FC = () => {
                 username: values.username,
                 email: values.email,
                 password: values.password,
-                confirmPassword: values.confirmPassword, // ✅ add this line
+                confirmPassword: values.confirmPassword,
             });
             message.success("🎉 Registration successful! Please login.");
             navigate("/login");
@@ -27,7 +30,6 @@ const SignUp: React.FC = () => {
             setLoading(false);
         }
     };
-
 
     return (
         <div
@@ -44,8 +46,16 @@ const SignUp: React.FC = () => {
                 style={{ width: 450, boxShadow: "0 0 20px rgba(0,0,0,0.05)" }}
                 bordered={false}
             >
-                <div style={{ textAlign: "center", marginBottom: 24 }}>
-                    <Title level={3}>📝 Sign Up for Finance Planner</Title>
+                {/* LOGO Section */}
+                <div style={{ textAlign: "center", marginBottom: 16 }}>
+                    <img
+                        src={logoUrl}
+                        alt="Finance Planner Logo"
+                        style={{ width: 64, height: 64, marginBottom: 8 }}
+                    />
+                    <Title level={3} style={{ marginBottom: 4 }}>
+                        📝 Sign Up for Finance Planner
+                    </Title>
                     <Text type="secondary">Create a free account to get started</Text>
                 </div>
 
@@ -106,8 +116,7 @@ const SignUp: React.FC = () => {
 
                     <Form.Item style={{ textAlign: "center", marginBottom: 0 }}>
                         <Text type="secondary">
-                            Already have an account?{" "}
-                            <Link to="/login">Login</Link>
+                            Already have an account? <Link to="/login">Login</Link>
                         </Text>
                     </Form.Item>
                 </Form>
